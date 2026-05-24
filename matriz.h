@@ -1,21 +1,25 @@
 // as funões de alocação, leitura, escrita e liberação de memória
-struct matriz{
-    struct elemento *inicio;
-    struct elemento *fim;
-
-}
-typedef struct matriz Matriz;
-
-struct elemento {
+struct informacao {
     int linha;
     int coluna;
     int valor;
+};
 
+
+struct elemento {
+    struct informacao info;
     struct elemento *prox;
     struct elemento *abaixo;
-}
+};
 
 typedef struct elemento Elemento;
+
+struct matriz{
+    Elemento *inicio;
+    Elemento *fim;
+
+};
+typedef struct matriz Matriz;
 
 //função para criar matriz
 //função vazia
