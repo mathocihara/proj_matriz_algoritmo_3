@@ -15,13 +15,18 @@ struct elemento {
 typedef struct elemento Elemento;
 
 struct matriz{
-    Elemento *inicio;
-    Elemento *fim;
+    Elemento *inicio; // topo esquerdo da matriz
+    Elemento *fim;    // inferior direito da matriz
 
 };
 typedef struct matriz Matriz;
 
 //função para criar matriz
+void desalocarMatriz(Matriz *m);
+void adicionarLinha(Matriz *m);
+void adicionarColuna(Matriz *m);
+void removerLinha(Matriz *m);
+void removerColuna(Matriz *m);
 //função vazia
 //funcao verificar existencia
 //funcao consultar nó
