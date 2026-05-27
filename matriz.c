@@ -4,7 +4,6 @@
 #include <stdlib.h>
 #include "matriz.h"
 
-
     Matriz* inicializarMatriz(){
         Matriz *m = (Matriz*)malloc(sizeof(Matriz));
         if(m != NULL){
@@ -75,6 +74,54 @@
         return -1;
     }
 
+    int inserirValor(Matriz *m, int linha, int coluna, int valor) {
+        if (!matrizInicializada(m) || matrizVazia(m)) return 0;
+
+        Elemento *auxLinha = m->inicio;
+        while (auxLinha != NULL && auxLinha->info.linha != linha) {
+            auxLinha = auxLinha->abaixo;
+        }
+        if (auxLinha == NULL) return 0; // linha não encontrada
+
+        Elemento *auxColuna = auxLinha;
+        while (auxColuna != NULL && auxColuna->info.coluna != coluna) {
+            auxColuna = auxColuna->prox;
+        }
+        if (auxColuna == NULL) return 0; // coluna não encontrada
+
+        auxColuna->info.valor = valor;
+        return 1;
+    }
+
+    /* Atualiza todos os índices (linha/coluna) e recalcula o ponteiro 'fim' da matriz */
+    void atualizarCoordenadas(Matriz *m) {
+        if (!matrizInicializada(m)) return;
+
+        if (matrizVazia(m)) {
+            m->fim = NULL;
+            return;
+        }
+
+        int linhaIndex = 0;
+        Elemento *linhaAtual = m->inicio;
+        Elemento *ultimoElemento = NULL;
+
+        while (linhaAtual != NULL) {
+            int colunaIndex = 0;
+            Elemento *colunaAtual = linhaAtual;
+            while (colunaAtual != NULL) {
+                colunaAtual->info.linha = linhaIndex;
+                colunaAtual->info.coluna = colunaIndex;
+                ultimoElemento = colunaAtual;
+                colunaAtual = colunaAtual->prox;
+                colunaIndex++;
+            }
+            linhaAtual = linhaAtual->abaixo;
+            linhaIndex++;
+        }
+        m->fim = ultimoElemento;
+    }
+
     /* Auxiliar: Cria e inicializa um novo elemento */
     Elemento* criarElemento(int linha, int coluna) {
         Elemento *novo = (Elemento*)malloc(sizeof(Elemento));
@@ -90,7 +137,9 @@
 
     /* Adiciona uma nova linha na parte inferior da matriz */
     void adicionarLinha(Matriz *m) {
-        if (m->inicio == NULL) {
+        if (!matrizInicializada(m)) return;
+
+        if (matrizVazia(m)) {
             Elemento *novo = criarElemento(0, 0);
             m->inicio = novo;
             m->fim = novo;
@@ -105,7 +154,6 @@
         Elemento *anterior = NULL;
         while (atual != NULL) {
             Elemento *novo = criarElemento(atual->info.linha + 1, atual->info.coluna);
-
             atual->abaixo = novo;
 
             if (anterior != NULL) {
@@ -114,12 +162,16 @@
             anterior = novo;
             atual = atual->prox;
         }
+    
+        // Atualizar m->fim para o último elemento inserido (que já está em 'anterior')
         m->fim = anterior;
     }
 
     /* Adiciona uma nova coluna a direita da matriz */
     void adicionarColuna(Matriz *m) {
-        if (m->inicio == NULL) {
+        if (!matrizInicializada(m)) return;
+
+        if (matrizVazia(m)) {
             Elemento *novo = criarElemento(0, 0);
             m->inicio = novo;
             m->fim = novo;
@@ -134,7 +186,6 @@
         Elemento *acima = NULL;
         while (atual != NULL) {
             Elemento *novo = criarElemento(atual->info.linha, atual->info.coluna + 1);
-
             atual->prox = novo;
 
             if (acima != NULL) {
@@ -143,86 +194,96 @@
             acima = novo;
             atual = atual->abaixo;
         }
+    
+        // Atualizar m->fim
         m->fim = acima;
     }
 
-    /* Remove a ultima linha da matriz */
-    void removerLinha(Matriz *m) {
-        if (m->inicio == NULL) return;
+    /* Remove uma linha específica da matriz pelo seu índice */
+    void removerLinha(Matriz *m, int linha_alvo) {
+        if (!matrizInicializada(m) || matrizVazia(m)) return;
 
-        if (m->inicio->abaixo == NULL) {
-            Elemento *atual = m->inicio;
-            while (atual != NULL) {
-                Elemento *temp = atual;
-                atual = atual->prox;
-                free(temp);
+        Elemento *atual = m->inicio;
+        Elemento *acima = NULL;
+
+        // Procura o início da linha alvo
+        while (atual != NULL && atual->info.linha != linha_alvo) {
+            acima = atual;
+            atual = atual->abaixo;
+        }
+
+        if (atual == NULL) return; // linha não encontrada
+
+        if (acima == NULL) {
+            // Caso acima for nulo, quer dizer que não iteramos sobre a matriz, logo removemos a primeira linha
+            m->inicio = atual->abaixo;
+        } else {
+            // Removendo do meio ou fim: reconectar verticalmente
+            Elemento *auxAcima = acima;
+            Elemento *auxAtual = atual;
+            while (auxAcima != NULL && auxAtual != NULL) {
+                auxAcima->abaixo = auxAtual->abaixo;
+                auxAcima = auxAcima->prox;
+                auxAtual = auxAtual->prox;
             }
-            m->inicio = NULL;
-            m->fim = NULL;
-            return;
         }
 
-        Elemento *penultima = m->inicio;
-        while (penultima->abaixo != NULL && penultima->abaixo->abaixo != NULL) {
-            penultima = penultima->abaixo;
-        }
+        // Reindexa toda a matriz e ajusta o ponteiro 'fim' automaticamente
+        atualizarCoordenadas(m);
 
-        Elemento *atual = penultima->abaixo;
-        while (atual != NULL) {
-            Elemento *temp = atual;
-            atual = atual->prox;
+        // Libera a memória da linha
+        Elemento *liberar = atual;
+        while (liberar != NULL) {
+            Elemento *temp = liberar;
+            liberar = liberar->prox;
             free(temp);
-        }
-
-        while (penultima != NULL) {
-            penultima->abaixo = NULL;
-            if (penultima->prox == NULL) {
-                m->fim = penultima;
-            }
-            penultima = penultima->prox;
         }
     }
 
-    /* Remove a ultima coluna da matriz */
-    void removerColuna(Matriz *m) {
-        if (m->inicio == NULL) return;
+    /* Remove uma coluna específica da matriz pelo seu índice */
+    void removerColuna(Matriz *m, int coluna_alvo) {
+        if (!matrizInicializada(m) || matrizVazia(m)) return;
 
-        if (m->inicio->prox == NULL) {
-            Elemento *atual = m->inicio;
-            while (atual != NULL) {
-                Elemento *temp = atual;
-                atual = atual->abaixo;
-                free(temp);
+        Elemento *atual = m->inicio;
+        Elemento *anterior = NULL;
+
+        // Procura o topo da coluna alvo
+        while (atual != NULL && atual->info.coluna != coluna_alvo) {
+            anterior = atual;
+            atual = atual->prox;
+        }
+
+        if (atual == NULL) return; // coluna não encontrada
+
+        if (anterior == NULL) {
+            // Caso anterior for nulo, então não iteramos, logo removemos a primeira coluna
+            m->inicio = atual->prox;
+        } else {
+            // Removendo do meio ou fim: reconectar horizontalmente
+            Elemento *auxAnterior = anterior;
+            Elemento *auxAtual = atual;
+            while (auxAnterior != NULL && auxAtual != NULL) {
+                auxAnterior->prox = auxAtual->prox;
+                auxAnterior = auxAnterior->abaixo;
+                auxAtual = auxAtual->abaixo;
             }
-            m->inicio = NULL;
-            m->fim = NULL;
-            return;
         }
 
-        Elemento *penultima = m->inicio;
-        while (penultima->prox != NULL && penultima->prox->prox != NULL) {
-            penultima = penultima->prox;
-        }
+        // Reindexa toda a matriz e ajusta o ponteiro 'fim' automaticamente
+        atualizarCoordenadas(m);
 
-        Elemento *atual = penultima->prox;
-        while (atual != NULL) {
-            Elemento *temp = atual;
-            atual = atual->abaixo;
+        // Libera a memória da coluna
+        Elemento *liberar = atual;
+        while (liberar != NULL) {
+            Elemento *temp = liberar;
+            liberar = liberar->abaixo;
             free(temp);
-        }
-
-        while (penultima != NULL) {
-            penultima->prox = NULL;
-            if (penultima->abaixo == NULL) {
-                m->fim = penultima;
-            }
-            penultima = penultima->abaixo;
         }
     }
 
     /* Percorre a matriz e desaloca todos os nos e a estrutura base */
     void desalocarMatriz(Matriz *m) {
-        if (m == NULL) return;
+        if (!matrizInicializada(m)) return;
 
         Elemento *linhaAtual = m->inicio;
         while (linhaAtual != NULL) {
@@ -237,8 +298,3 @@
         }
         free(m);
     }
-
-    //funcao insere final
-    //função insere início
-    //função tamanho matriz(x_y)
-    //primeiraCelulaLinha()( ultima celula de cada lista tem que direcionar para a primeira celualr da litsa)
