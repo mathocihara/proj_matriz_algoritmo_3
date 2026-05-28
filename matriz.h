@@ -1,6 +1,3 @@
-#ifndef MATRIZ_H
-#define MATRIZ_H
-
 struct informacao {
     int linha;
     int coluna;
@@ -34,5 +31,3 @@ void adicionarColuna(Matriz *m);
 void removerLinha(Matriz *m, int linha_alvo);
 void removerColuna(Matriz *m, int coluna_alvo);
 void desalocarMatriz(Matriz *m);
-
-#endif
