@@ -1,10 +1,8 @@
-// as funões de alocação, leitura, escrita e liberação de memória
 struct informacao {
     int linha;
     int coluna;
     int valor;
 };
-
 
 struct elemento {
     struct informacao info;
@@ -14,18 +12,22 @@ struct elemento {
 
 typedef struct elemento Elemento;
 
-struct matriz{
-    Elemento *inicio;
-    Elemento *fim;
-
+struct matriz {
+    Elemento *inicio; // topo esquerdo da matriz
+    Elemento *fim;    // inferior direito da matriz
 };
 typedef struct matriz Matriz;
 
-//função para criar matriz
-//função vazia
-//funcao verificar existencia
-//funcao consultar nó
-//funcao insere final
-//função insere início
-//função tamanho matriz(x_y)
-//primeiraCelulaLinha()
+Matriz* inicializarMatriz();
+int matrizInicializada(Matriz *m);
+int matrizVazia(Matriz *m);
+int consultarCoordenada(Matriz *m, int a, int b);
+int inserirValor(Matriz *m, int linha, int coluna, int valor);
+void atualizarCoordenadas(Matriz *m);
+
+Elemento* criarElemento(int linha, int coluna);
+void adicionarLinha(Matriz *m);
+void adicionarColuna(Matriz *m);
+void removerLinha(Matriz *m, int linha_alvo);
+void removerColuna(Matriz *m, int coluna_alvo);
+void desalocarMatriz(Matriz *m);
