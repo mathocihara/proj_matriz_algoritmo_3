@@ -31,3 +31,10 @@ void adicionarColuna(Matriz *m);
 void removerLinha(Matriz *m, int linha_alvo);
 void removerColuna(Matriz *m, int coluna_alvo);
 void desalocarMatriz(Matriz *m);
+
+// atualizado
+Elemento* localizarElemento(Matriz *m, int linha, int coluna);
+Matriz* criarMatriz(int linhas, int colunas);
+Elemento* buscarValor(Matriz *m, int valor);
+void imprimirVizinhos(Matriz *m, int linha, int coluna);
+void imprimirMatriz(Matriz *m);
