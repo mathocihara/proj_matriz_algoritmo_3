@@ -45,11 +45,16 @@ int main(){
     int colunaRemover;
     printf("\nDigite a coluna para remover: ");
     scanf("%d",&colunaRemover);
-    removerColuna(m,colunaRemover);
-    colunas--;
+    if(colunaRemover >= 0 && colunaRemover < colunas) {
+        removerColuna(m,colunaRemover);
+        colunas--;
+    } else {
+        printf("Coluna invalida! (Deve ser de 0 a %d)\n", colunas - 1);
+    }
     imprimirMatriz(m);
 
     //ADICIONANDO UMA LINHA
+    adicionarLinha(m);
     printf("\nDigite os valores da nova linha:\n");
 
     for(j = 0; j < colunas; j++){
