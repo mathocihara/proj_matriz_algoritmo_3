@@ -576,3 +576,150 @@ void imprimirMatriz(Matriz *m){
         auxLinha = auxLinha->abaixo;
     }
 }
+
+// MENU DE TESTES
+
+int menu(){
+    int opcao;
+
+    printf("\n===== MENU =====\n");
+    printf("1 - Imprimir matriz\n");
+    printf("2 - Inserir valor\n");
+    printf("3 - Remover linha\n");
+    printf("4 - Remover coluna\n");
+    printf("5 - Adicionar linha\n");
+    printf("6 - Adicionar coluna\n");
+    printf("7 - Buscar valor\n");
+    printf("8 - Buscar coordenada\n");
+    printf("0 - Sair\n");
+    printf("Opcao: ");
+
+    scanf("%d", &opcao);
+
+    return opcao;
+}
+
+void executar(Matriz *m, int *linhas, int *colunas){
+    int opcao = -1;
+
+    while(opcao != 0){
+
+        opcao = menu();
+
+        switch(opcao){
+
+            case 1:
+                imprimirMatriz(m);
+                break;
+
+            case 2: {
+                int linha, coluna, valor;
+
+                printf("Linha: ");
+                scanf("%d",&linha);
+
+                printf("Coluna: ");
+                scanf("%d",&coluna);
+
+                printf("Valor: ");
+                scanf("%d",&valor);
+
+                inserirValor(m, linha, coluna, valor);
+                break;
+            }
+
+            case 3: {
+                int l;
+                printf("Linha para remover: ");
+                scanf("%d",&l);
+
+                removerLinha(m, l);
+                (*linhas)--;
+                break;
+            }
+
+            case 4: {
+                int c;
+                printf("Coluna para remover: ");
+                scanf("%d",&c);
+
+                removerColuna(m, c);
+                (*colunas)--;
+                break;
+            }
+
+            case 5: {
+                adicionarLinha(m);
+
+                printf("Digite valores da nova linha:\n");
+
+                for(int j = 0; j < *colunas; j++){
+                    int v;
+                    scanf("%d",&v);
+                    inserirValor(m, *linhas, j, v);
+                }
+
+                (*linhas)++;
+                break;
+            }
+
+            case 6: {
+                adicionarColuna(m);
+
+                printf("Digite valores da nova coluna:\n");
+
+                for(int i = 0; i < *linhas; i++){
+                    int v;
+                    scanf("%d",&v);
+                    inserirValor(m, i, *colunas, v);
+                }
+
+                (*colunas)++;
+                break;
+            }
+
+            case 7: {
+                int v;
+                printf("Valor: ");
+                scanf("%d",&v);
+
+                Elemento *res = buscarValor(m, v);
+
+                if(res != NULL){
+                    printf("Encontrado em (%d,%d)\n",
+                        res->info.linha,
+                        res->info.coluna);
+                } else {
+                    printf("Nao encontrado\n");
+                }
+                break;
+            }
+
+            case 8: {
+                int l,c;
+
+                printf("Linha: ");
+                scanf("%d",&l);
+
+                printf("Coluna: ");
+                scanf("%d",&c);
+
+                int valor = consultarCoordenada(m, l, c);
+
+                if(valor != -1){
+                    printf("Valor: %d\n", valor);
+                } else {
+                    printf("Nao encontrado\n");
+                }
+                break;
+            }
+
+            case 0:
+                printf("Saindo...\n");
+                break;
+
+            default:
+                printf("Opcao invalida\n");
+        }
+    }
+}
